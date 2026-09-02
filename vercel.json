@@ -2,11 +2,10 @@
     "name": "mega-clone",
     "version": 2,
     "builds": [
-        { "src": "*.html", "use": "@vercel/static" },
+        { "src": "index.html", "use": "@vercel/static" },
         { "src": "api/*.js", "use": "@vercel/node" }
     ],
     "routes": [
-        { "src": "/admin", "dest": "/admin.html" },
         { "src": "/api/(.*)", "dest": "/api/$1" },
         { "src": "/(.*)", "dest": "/index.html" }
     ]
