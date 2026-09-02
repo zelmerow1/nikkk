@@ -2,7 +2,7 @@
     "name": "mega-clone",
     "version": 2,
     "builds": [
-        { "src": "index.html", "use": "@vercel/static" },
+        { "src": "*.html", "use": "@vercel/static" },
         { "src": "api/index.js", "use": "@vercel/node" }
     ],
     "routes": [
